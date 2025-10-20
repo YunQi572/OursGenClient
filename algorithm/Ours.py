@@ -855,8 +855,8 @@ class OursClient(BaseClient):
                     real_feature = subgraph.x[same_class_indices[random_idx]]
                     
                     kl_loss = F.kl_div(
-                        F.log_softmax(all_generated_features[i]),
-                        F.softmax(real_feature),
+                        F.log_softmax(all_generated_features[i], dim = 0),
+                        F.softmax(real_feature, dim = 0),
                         reduction = 'sum'
                     )
 

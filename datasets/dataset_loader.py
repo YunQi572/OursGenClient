@@ -33,54 +33,13 @@ from torch_geometric.data import InMemoryDataset, download_url, Data
 
 from .partition import *
 
-
-'''
-#将节点标签随机划分为 训练集、验证集 和 测试集，并返回对应的索引
-def rand_train_test_idx(label, train_prop, vaild_prop, test_prop, ignore_negative = True):
-    labeled_nodes = torch.where(label != -1)[0]     #找到标签不是-1的节点
-
-    n = labeled_nodes.shape[0]                      #节点个数
-    train_num = int(n * train_prop)                 #训练集个数
-    valid_num = int(n * valid_prop)                 #验证集个数
-    test_num = int(n * test_prop)                   #测试集个数
-
-    perm = torch.as_tensor(np.random.permutation(n))#1 - n 的随机序列
-    train_idx = perm[: train_num]
-    valid_idx = perm[train_num : train_num + vaild_num]
-    test_idx = perm[train_num + vaild_num : train_num + vaild_num + test_num]
-
-    return {'train': train_idx.numpy(), 'valid': valid_idx.numpy(), 'test': test_idx.numpy()}
-
-
-#将包含训练集、验证集和测试集节点索引的列表转换为对应的布尔型掩码
-def index_to_mask(splits, num_nodes):
-    mask_len = len(splits)
-    train_mask = torch.zeros(num_nodes, dtype = torch.bool)
-    valid_mask = torch.zeros(num_nodes, dtype = torch.bool)
-    test_mask = torch.zeros(num_nodes, dtype = torch.bool)
-
-    for i in range(mask_len):
-        train_mask[splits[i]['train']] = True
-        valid_mask[splits[i]['valid']] = True
-        test_mask[splits[i]['test']] = True
-
-    return train_mask, valid_mask, test_mask
-
-'''
-
-
-'''
-    elif dataset in ["Flickr"]:
-        train_, val_, test_ = 0.6, 0.2, 0.2
-    elif dataset == "Roman-empire":
-        train_, val_, test_ = 0.5, 0.25, 0.25
-'''
-
-
 #加载数据
 def load_dataset(root_dir, dataset_name, per_task_class_num, agrs, num_masks = 1):
-    assert dataset_name in ('cora', 'citeseer', 'computers', 'physics', 'actor', 
-                            'ogbn-arxiv', 'squirrel', 'flickr', 'roman-empire'), 'Invalid dataset'
+    assert dataset_name in ('cora', 'citeseer', 'pubmed', 'ogbn-arxiv',
+                            'computers', 'physics', 'roman_empire', 'year'), 'Invalid dataset'
+
+    # assert dataset_name in ('cora', 'citeseer', 'computers', 'physics', 'actor', 
+    #                         'ogbn-arxiv', 'squirrel', 'flickr', 'roman-empire'), 'Invalid dataset'
 
     # if len(train_valid_test_split) != 3:
     #     print("Invalid splits, will use default split proportioin")
@@ -90,54 +49,98 @@ def load_dataset(root_dir, dataset_name, per_task_class_num, agrs, num_masks = 1
     # valid_prop = train_valid_test_split[1]
     # test_prop = train_valid_test_split[2]
     # num_masks = 1
-    if dataset_name in ['cora', 'citeseer', 'computers', 'physics', 'actor']:
-        train_prop, valid_prop, test_prop = 0.2, 0.4, 0.4
-    elif dataset_name in ["ogbn-arxiv", "flickr"]:
-        train_prop, valid_prop, test_prop = 0.6, 0.2, 0.2
-    elif dataset_name == "squirrel":
-        train_prop, valid_prop, test_prop = 0.48, 0.32, 0.2
-    elif dataset_name == "roman-empire":
-        train_prop, valid_prop, test_prop = 0.5, 0.25, 0.25
+    # if dataset_name in ['cora', 'citeseer', 'computers', 'physics', 'actor']:
+    #     train_prop, valid_prop, test_prop = 0.2, 0.4, 0.4
+    # elif dataset_name in ["ogbn-arxiv", "flickr"]:
+    #     train_prop, valid_prop, test_prop = 0.6, 0.2, 0.2
+    # elif dataset_name == "squirrel":
+    #     train_prop, valid_prop, test_prop = 0.48, 0.32, 0.2
+    # elif dataset_name == "roman-empire":
+    #     train_prop, valid_prop, test_prop = 0.5, 0.25, 0.25
         
     
 
-    if dataset_name in ['cora', 'citeseer']:
+    if dataset_name in ['cora', 'citeseer', 'pubmed']:
         dataset = Planetoid(root = root_dir, name = dataset_name)
         data = dataset[0]                   #数据集只有一张大图，所以只用取出第一个图就行
     
-    elif dataset_name in ['computers', 'photo']:
-        dataset = Amazon(root=root_dir, name=dataset_name)
-        data = dataset[0]
-
-    elif dataset_name == 'physics':
-        dataset = Coauthor(root=root_dir, name=dataset_name, transform=T.NormalizeFeatures())
-        data = dataset[0]
-
-    elif dataset_name == 'ogbn-arxiv':
+    elif dataset_name in ['ogbn-arxiv']:
         dataset = PygNodePropPredDataset(name=dataset_name, root=root_dir)
         data = dataset[0]
 
-    elif dataset_name == 'actor':
-        dataset = Actor(root='/data1/huangsuyuan/GHY/graph/actor')
+    elif dataset_name in ['computers']:
+        dataset = Amazon(root=root_dir, name=dataset_name)
         data = dataset[0]
 
-    elif dataset_name in ['squirrel']:
-        dataset = WikipediaNetwork(root=root_dir, name='squirrel')
+    elif dataset_name in ['physics']:
+        dataset = Coauthor(root=root_dir, name=dataset_name, transform=T.NormalizeFeatures())
         data = dataset[0]
 
-    elif dataset_name == "flickr":
-        dataset = Flickr(root=root_dir,transform=T.NormalizeFeatures())
+    elif dataset_name in ["roman_empire"]:
+        dataset = HeterophilousGraphDataset(root=root_dir, name=dataset_name)
         data = dataset[0]
+    
+    elif dataset_name in ['year']:
+        data = load_arxiv_year()
 
-    elif dataset_name == "roman-empire":
-        dataset = HeterophilousGraphDataset(root=root_dir, name='roman-empire')
-        data = dataset[0]
+    # elif dataset_name in ['actor']:
+    #     dataset = Actor(root='/data1/huangsuyuan/GHY/graph/actor')
+    #     data = dataset[0]
 
-    train_valid_test_split = [train_prop, valid_prop, test_prop]
+    # elif dataset_name in ['squirrel']:
+    #     dataset = WikipediaNetwork(root=root_dir, name='squirrel')
+    #     data = dataset[0]
+
+    # elif dataset_name == "flickr":
+    #     dataset = Flickr(root=root_dir,transform=T.NormalizeFeatures())
+    #     data = dataset[0]
+
+
+
+    # train_valid_test_split = [train_prop, valid_prop, test_prop]
     in_dim = data.x.shape[1]
     out_dim = ((data.y.max().item() + 1) // per_task_class_num) * per_task_class_num
 
-    return data, in_dim, out_dim, train_valid_test_split
+    return data, in_dim, out_dim
+
+def load_arxiv_year(nclass=5):
+    # filename = 'arxiv-year'
+    # dataset = NCDataset(filename)
+    ogb_dataset = NodePropPredDataset(name='ogbn-arxiv')
+    graph = ogb_dataset.graph
+    edge_index = torch.as_tensor(graph['edge_index'])
+    x = torch.as_tensor(graph['node_feat'])
+
+    label = even_quantile_labels(graph['node_year'].flatten(), nclass, verbose=False)
+    y = torch.as_tensor(label).reshape(-1)
+
+    data = Data(x=x, edge_index=edge_index, y=y)
+    return data
+
+def even_quantile_labels(vals, nclasses, verbose=True):
+    """ partitions vals into nclasses by a quantile based split,
+    where the first class is less than the 1/nclasses quantile,
+    second class is less than the 2/nclasses quantile, and so on
+
+    vals is np array
+    returns an np array of int class labels
+    """
+    label = -1 * np.ones(vals.shape[0], dtype=np.int)
+    interval_lst = []
+    lower = -np.inf
+    for k in range(nclasses - 1):
+        upper = np.nanquantile(vals, (k + 1) / nclasses)
+        interval_lst.append((lower, upper))
+        inds = (vals >= lower) * (vals < upper)
+        label[inds] = k
+        lower = upper
+    label[vals >= lower] = nclasses - 1
+    interval_lst.append((lower, np.inf))
+    if verbose:
+        print('Class Label Intervals:')
+        for class_idx, interval in enumerate(interval_lst):
+            print(f'Class {class_idx}: [{interval[0]}, {interval[1]})]')
+    return label
 
 #将加载的数据按类分割为一个一个任务集（包括训练、验证、测试集）将一个子图（x,y,edge_index）先按每个任务中包含的类再分割成不同的子图，一个任务包含一个子图，然后再在子图中分训练、验证、测试集掩码
 def class_to_task(data, per_task_class_num, train_prop, valid_prop, test_prop, shuffle_flag = False):
@@ -268,3 +271,4 @@ def get_client_task(data, clients_num, per_task_class_num, train_prop, valid_pro
         print(f"DROPS {data.y.max().item() + 1 - classes_used_num} CLASS(ES).")
 
     return clients_tasks, in_dim, out_dim
+

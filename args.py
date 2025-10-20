@@ -14,13 +14,7 @@ if not os.path.exists(root_dir):
 
 parser.add_argument("--dataset_dir", type=str, default=root_dir, help='数据集路径')
 
-
-# 联邦学习参数
-parser.add_argument('--clients_num', type=int, default=3, help='客户端数量')
-
-
 # 数据分割参数
-parser.add_argument('--per_task_class_num', type=int, default=2, help='每个任务的类别数')
 parser.add_argument('--train_prop', type=float, default=0.6, help='训练集比例')
 parser.add_argument('--valid_prop', type=float, default=0.2, help='验证集比例') 
 parser.add_argument('--test_prop', type=float, default=0.2, help='测试集比例')
@@ -53,19 +47,19 @@ parser.add_argument('--threshold', type=float, default=0.5, help='链接器预�
 
 
 # 优化器参数
-parser.add_argument('--lr', type=float, default=0.01, help='学习率')
 parser.add_argument('--weight_decay', type=float, default=5e-4, help='权重衰减')
 
 
 parser.add_argument('--use_gpu', type=bool, default=True, help='GPU OR CPU')
-parser.add_argument('--device_id', type=int, default=2, help='GPU ID')
+parser.add_argument('--device_id', type=int, default=7, help='GPU ID')
 
 parser.add_argument('--rounds', type=int, default=10, help='联邦学习轮数')
 parser.add_argument('--gen_rounds', type=int, default=3, help='生成器联邦学习轮数')
 parser.add_argument('--local_epochs', type=int, default=3, help='本地训练轮数')
-parser.add_argument('--kd_epochs', type=int, default=60, help='知识蒸馏训练轮数')
-parser.add_argument('--gen_epochs', type=int, default=200, help='生成器训练轮数')
+parser.add_argument('--kd_epochs', type=int, default=50, help='知识蒸馏训练轮数')
+parser.add_argument('--gen_epochs', type=int, default=300, help='生成器训练轮数')
 
+parser.add_argument('--lr', type=float, default=0.01, help='客户端GNN学习率')
 parser.add_argument('--gen_lr', type=float, default=0.005, help='生成器学习率')
 parser.add_argument('--kd_lr', type=float, default=0.002, help='知识蒸馏学习率')
 
@@ -80,21 +74,27 @@ parser.add_argument('--gen_reduction_ratio', type=float, default=0.1, help='减�
 
 
 parser.add_argument('--num_samples', type=int, default=200, help='每轮生成的样本数')
-parser.add_argument('--gen_num_nodes', type=int, default=2, help='生成的样本节点之间的随机边比例')
-parser.add_argument('--tolerance', type=float, default=0.05, help='容忍度')
-parser.add_argument('--max_iterations', type=int, default=30, help='最大调整次数')
+
 
 # getS_high中的参数 
 parser.add_argument('--feature_prop', type=float, default=0.1, help='特征选取的比例')
 parser.add_argument('--S_high_x_weight', type=float, default=0.5, help='S_high_x 的权重')
 parser.add_argument('--S_high_D_weight', type=float, default=0.5, help='S_high_D 的权重')
 
-parser.add_argument('--save_dir', type=str, default="./Seed38/Plot/Flickr/GCN1", help='损失函数图的存放路径')
-
+parser.add_argument('--save_dir', type=str, default="./Seed38/Plot/Year/1GCN2", help='损失函数图的存放路径')
 
 parser.add_argument('--num_samples_per_class', type=int, default=80, help='KD_train时每个类别的样本数')
 
 
-parser.add_argument("--dataset_name", type=str, default="flickr", help='数据集名称')
+parser.add_argument("--dataset_name", type=str, default="year", help='数据集名称')
 parser.add_argument('--seed', type=int, default=38, help='随机种子')
 parser.add_argument('--model', type=str, default='GCN', help='模型: GCN, GAT')
+
+parser.add_argument('--gen_num_nodes', type=int, default=2, help='生成的样本节点之间的随机边比例')
+parser.add_argument('--tolerance', type=float, default=0.05, help='容忍度')
+parser.add_argument('--max_iterations', type=int, default=30, help='最大调整次数')
+parser.add_argument('--per_task_class_num', type=int, default=2, help='每个任务的类别数')
+
+
+# 联邦学习参数
+parser.add_argument('--clients_num', type=int, default=5, help='客户端数量')
